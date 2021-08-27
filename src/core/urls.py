@@ -3,5 +3,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('', include('piggybank.urls')),
+    path('users/', include('users.urls')),
     path('admin/', admin.site.urls),
 ]

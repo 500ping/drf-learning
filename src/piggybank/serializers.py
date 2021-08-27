@@ -1,8 +1,8 @@
 from django.db import models
-from django.db.models.query import QuerySet
 from rest_framework import serializers
 
 from .models import Category, Currency, Transaction
+from users.serializers import ReadUserSerializer
 
 
 class CurrencySerializer(serializers.ModelSerializer):
@@ -12,9 +12,11 @@ class CurrencySerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = Category
-        fields = ('id', 'name')
+        fields = ('id', 'name', 'user',)
 
 
 # class TransactionSerializer(serializers.ModelSerializer):
@@ -30,6 +32,7 @@ class WriteTransactionSerializer(serializers.ModelSerializer):
     # Show code of the currency instead of id
     currency = serializers.SlugRelatedField(slug_field="code", queryset=Currency.objects.all())
     category = serializers.SlugRelatedField(slug_field="name", queryset=Category.objects.all())
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Transaction
@@ -39,13 +42,21 @@ class WriteTransactionSerializer(serializers.ModelSerializer):
             "date",
             "description",
             "category",
+            "user",
         )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Only accept categories which is created by current user
+        user = self.context['request'].user
+        self.fields['category'].queryset = user.categories.all()
 
 
 class ReadTransactionSerializer(serializers.ModelSerializer):
     # Show the currenct object instead of id
     currency = CurrencySerializer()
     category = CategorySerializer()
+    user = ReadUserSerializer()
 
     class Meta:
         model = Transaction
@@ -56,5 +67,6 @@ class ReadTransactionSerializer(serializers.ModelSerializer):
             "date",
             "description",
             "category",
+            "user",
         )
         read_only_fields = fields # Speed up the code, Django just care about retrive the data

@@ -1,13 +1,15 @@
 from django.db.models import query
-from django.db.models.query import QuerySet
+from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from .models import Currency, Category, Transaction
-from .serializers import CurrencySerializer, CategorySerializer, ReadTransactionSerializer, WriteTransactionSerializer
+from .serializers import CurrencySerializer, CategorySerializer, ReadTransactionSerializer, WriteTransactionSerializer, ReportEntrySerializer, ReportParamsSerializer
+from .reports import transaction_report
 
 
 class CurrencyListAPIView(ListAPIView):
@@ -48,3 +50,16 @@ class TransactionModelViewSet(ModelViewSet):
     # def perform_create(self, serializer):
     #     serializer.save(user=self.request.user)
     #     return super().perform_create(serializer)
+
+
+class TransactionReportAPIView(APIView):
+    permission_classes = [IsAuthenticated,]
+
+    def get(self, request):
+        print(request.GET)
+        params_serializer = ReportParamsSerializer(data=request.GET, context={"request": request})
+        params_serializer.is_valid(raise_exception=True)
+        params = params_serializer.save()
+        data = transaction_report(params)
+        serializer = ReportEntrySerializer(instance=data, many=True)
+        return Response(data=serializer.data)

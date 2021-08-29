@@ -30,8 +30,8 @@ Currency.objects.bulk_create([
 
 # Create Category
 Category.objects.bulk_create([
-    Category(user=random.choice(users), name="Pets"),
-    Category(user=random.choice(users), name="Hobby"),
+    Category(user=users[0], name="Pets"),
+    Category(user=users[1], name="Hobby"),
     Category(user=random.choice(users), name="Home"),
 ])
 

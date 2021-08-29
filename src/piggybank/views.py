@@ -6,6 +6,7 @@ from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework_xml.renderers import XMLRenderer
 
 from .models import Currency, Category, Transaction
 from .serializers import CurrencySerializer, CategorySerializer, ReadTransactionSerializer, WriteTransactionSerializer, ReportEntrySerializer, ReportParamsSerializer
@@ -16,6 +17,7 @@ class CurrencyListAPIView(ListAPIView):
     queryset = Currency.objects.all()
     serializer_class = CurrencySerializer
     pagination_class = None # No Pagination
+    # renderer_classes = [XMLRenderer]
 
 
 class CategoryModelViewSet(ModelViewSet):

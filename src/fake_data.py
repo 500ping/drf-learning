@@ -16,7 +16,7 @@ user.is_staff=True
 user.save()
 # Normal user
 user = User.objects.create_user('test', password='Cacto_123')
-user.is_staff=True
+# user.is_staff=True
 user.save()
 
 users = list(User.objects.all())

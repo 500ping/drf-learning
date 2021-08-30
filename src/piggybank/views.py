@@ -4,24 +4,33 @@ from rest_framework.generics import ListAPIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, DjangoModelPermissions, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework_xml.renderers import XMLRenderer
 
 from .models import Currency, Category, Transaction
 from .serializers import CurrencySerializer, CategorySerializer, ReadTransactionSerializer, WriteTransactionSerializer, ReportEntrySerializer, ReportParamsSerializer
 from .reports import transaction_report
+from .permissions import IsAdminOrReadOnly
 
 
-class CurrencyListAPIView(ListAPIView):
+# class CurrencyListAPIView(ListAPIView):
+#     permission_classes = [AllowAny,]
+#     queryset = Currency.objects.all()
+#     serializer_class = CurrencySerializer
+#     pagination_class = None # No Pagination
+    # renderer_classes = [XMLRenderer]
+
+class CurrencyModelViewSet(ModelViewSet):
+    permission_classes = [IsAdminOrReadOnly,]
     queryset = Currency.objects.all()
     serializer_class = CurrencySerializer
     pagination_class = None # No Pagination
-    # renderer_classes = [XMLRenderer]
 
 
 class CategoryModelViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated,]
+    # Need to regis permission to the user
+    permission_classes = [DjangoModelPermissions,]
     serializer_class = CategorySerializer
 
     def get_queryset(self):
@@ -29,7 +38,7 @@ class CategoryModelViewSet(ModelViewSet):
 
 
 class TransactionModelViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated,]
+    # permission_classes = [IsAuthenticated,]
     # queryset =  Transaction.objects.all()
     # Because query with foreign key, we should use select_related() to prefetch info from db
     # Django now just use 1 query
@@ -55,7 +64,7 @@ class TransactionModelViewSet(ModelViewSet):
 
 
 class TransactionReportAPIView(APIView):
-    permission_classes = [IsAuthenticated,]
+    # permission_classes = [IsAuthenticated,]
 
     def get(self, request):
         print(request.GET)
